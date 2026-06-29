@@ -105,9 +105,11 @@ export function BracketClient({ userId, matches, existingPredictions, isLocked, 
     }
   }
 
-  const complete = isDraftComplete(draft, matches)
-  const completed = countCompletedPredictions(draft)
-  const total = matches.length
+  // Played matches (result_locked) don't need a user prediction
+  const playableMatches = matches.filter((m) => !m.result_locked)
+  const complete = isDraftComplete(draft, playableMatches)
+  const completed = countCompletedPredictions(draft, playableMatches)
+  const total = playableMatches.length
 
   if (matches.length === 0) {
     return (

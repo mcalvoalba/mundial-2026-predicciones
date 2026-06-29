@@ -38,8 +38,10 @@ export function BracketTree({ matches, draft, mode, onDraftChange }: BracketTree
       .sort((a, b) => a.match_number - b.match_number)
   }
 
-  const totalMatches = matches.length
-  const completed = countCompletedPredictions(draft)
+  // Only count matches that aren't already played (locked = no prediction needed)
+  const playableMatches = matches.filter((m) => !m.result_locked)
+  const totalMatches = playableMatches.length
+  const completed = countCompletedPredictions(draft, playableMatches)
 
   return (
     <div className="flex flex-col">

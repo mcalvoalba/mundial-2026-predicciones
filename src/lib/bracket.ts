@@ -150,11 +150,21 @@ export function isDraftComplete(draft: Map<number, DraftPrediction>, matches: Ma
   return true
 }
 
-export function countCompletedPredictions(draft: Map<number, DraftPrediction>): number {
+export function countCompletedPredictions(draft: Map<number, DraftPrediction>, matches?: Match[]): number {
   let count = 0
-  for (const pred of draft.values()) {
-    if (pred.predicted_winner && pred.predicted_home_goals_90 !== '' && pred.predicted_away_goals_90 !== '') {
-      count++
+  if (matches) {
+    // Only count predictions for the given matches
+    for (const match of matches) {
+      const pred = draft.get(match.id)
+      if (pred && pred.predicted_winner && pred.predicted_home_goals_90 !== '' && pred.predicted_away_goals_90 !== '') {
+        count++
+      }
+    }
+  } else {
+    for (const pred of draft.values()) {
+      if (pred.predicted_winner && pred.predicted_home_goals_90 !== '' && pred.predicted_away_goals_90 !== '') {
+        count++
+      }
     }
   }
   return count
