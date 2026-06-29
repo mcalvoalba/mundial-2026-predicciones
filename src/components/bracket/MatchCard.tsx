@@ -67,14 +67,17 @@ export function MatchCard({ match, draft, mode, onClick }: MatchCardProps) {
   // Enable the card if either the DB has teams OR the user's draft has propagated winners
   const hasTeams = !!(match.home_team || match.home_seed || draft?.predicted_home || draft?.predicted_away)
 
+  const viewClickable = mode === 'view' && !!draft?.predicted_winner
+
   return (
     <button
-      onClick={mode === 'edit' ? onClick : undefined}
+      onClick={(mode === 'edit' && hasTeams) || viewClickable ? onClick : undefined}
       disabled={mode === 'edit' && !hasTeams}
       className={cn(
         'w-40 rounded-lg border bg-card text-left transition-all',
         mode === 'edit' && hasTeams && 'hover:border-green-600 hover:shadow-sm active:scale-95 cursor-pointer',
-        mode === 'view' && 'cursor-default',
+        mode === 'view' && !viewClickable && 'cursor-default',
+        viewClickable && 'hover:border-primary/40 hover:shadow-sm active:scale-95 cursor-pointer',
         isComplete && 'border-green-600/50',
         !isComplete && mode === 'edit' && 'border-border',
         !hasTeams && 'opacity-40 cursor-not-allowed'

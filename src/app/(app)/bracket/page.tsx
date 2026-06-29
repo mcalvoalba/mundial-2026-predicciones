@@ -14,16 +14,19 @@ export default async function BracketPage() {
     supabase.from('bracket_submissions').select('*').eq('user_id', user.id).single(),
   ])
 
-  const deadline = process.env.NEXT_PUBLIC_DEADLINE_ISO
-  const isDeadlinePassed = deadline ? new Date() >= new Date(deadline) : false
+  // Deadline: 18:55 hora española (CEST = UTC+2) → 16:55 UTC
+  const deadline = process.env.DEADLINE_ISO ?? process.env.NEXT_PUBLIC_DEADLINE_ISO ?? '2026-06-29T16:55:00Z'
+  const isDeadlinePassed = new Date() >= new Date(deadline)
+  const hasSubmitted = !!(submissionRes.data?.submitted_at)
 
   return (
     <BracketClient
       userId={user.id}
       matches={(matchesRes.data ?? []) as Match[]}
       existingPredictions={(predictionsRes.data ?? []) as Prediction[]}
-      isLocked={(submissionRes.data?.is_locked ?? false) || isDeadlinePassed}
-      deadlineISO={deadline ?? null}
+      isLocked={isDeadlinePassed}
+      hasSubmitted={hasSubmitted}
+      deadlineISO={deadline}
     />
   )
 }

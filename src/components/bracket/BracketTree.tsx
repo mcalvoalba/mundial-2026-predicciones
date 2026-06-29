@@ -21,9 +21,8 @@ export function BracketTree({ matches, draft, mode, onDraftChange }: BracketTree
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null)
 
   const handleMatchClick = useCallback((match: Match) => {
-    if (mode !== 'edit') return
     setSelectedMatch(match)
-  }, [mode])
+  }, [])
 
   const handleSave = useCallback((updatedDraft: DraftPrediction) => {
     if (!selectedMatch || !onDraftChange) return
@@ -110,7 +109,8 @@ export function BracketTree({ matches, draft, mode, onDraftChange }: BracketTree
           draft={draft.get(selectedMatch.id) ?? createEmptyDraft(selectedMatch)}
           open={!!selectedMatch}
           onClose={() => setSelectedMatch(null)}
-          onSave={handleSave}
+          onSave={mode === 'edit' ? handleSave : () => setSelectedMatch(null)}
+          readOnly={mode === 'view'}
         />
       )}
     </div>

@@ -1,20 +1,23 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Badge } from '@/components/ui/badge'
 import type { LeaderboardEntry } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { Medal, Trophy } from 'lucide-react'
+import { Medal, Trophy, ChevronRight } from 'lucide-react'
 
 interface LeaderboardTableProps {
   entries: LeaderboardEntry[]
   currentUserId: string
+  hasSubmitted: boolean
 }
 
 const MEDAL_COLORS = ['text-yellow-500', 'text-slate-400', 'text-amber-600']
 
-export function LeaderboardTable({ entries: initialEntries, currentUserId }: LeaderboardTableProps) {
+export function LeaderboardTable({ entries: initialEntries, currentUserId, hasSubmitted }: LeaderboardTableProps) {
+  const router = useRouter()
   const [entries, setEntries] = useState<LeaderboardEntry[]>(initialEntries)
 
   useEffect(() => {
@@ -48,12 +51,15 @@ export function LeaderboardTable({ entries: initialEntries, currentUserId }: Lea
       {entries.map((entry, index) => {
         const isMe = entry.user_id === currentUserId
         const rank = index + 1
+        const canViewBracket = hasSubmitted && !isMe
         return (
           <div
             key={entry.user_id}
+            onClick={canViewBracket ? () => router.push(`/bracket/${entry.user_id}`) : undefined}
             className={cn(
               'flex items-center gap-3 p-3 rounded-xl border transition-colors',
-              isMe ? 'border-green-600 bg-green-600/5' : 'border-border bg-card'
+              isMe ? 'border-green-600 bg-green-600/5' : 'border-border bg-card',
+              canViewBracket && 'cursor-pointer hover:border-primary/40 hover:bg-accent/50 active:scale-[0.99]'
             )}
           >
             {/* Rank */}
@@ -99,6 +105,10 @@ export function LeaderboardTable({ entries: initialEntries, currentUserId }: Lea
               <p className="text-xl font-bold tabular-nums">{entry.total_points}</p>
               <p className="text-[10px] text-muted-foreground">{entry.matches_scored} jugados</p>
             </div>
+
+            {canViewBracket && (
+              <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            )}
           </div>
         )
       })}

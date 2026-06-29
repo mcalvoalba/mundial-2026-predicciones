@@ -31,10 +31,11 @@ interface BracketClientProps {
   matches: Match[]
   existingPredictions: Prediction[]
   isLocked: boolean
+  hasSubmitted: boolean
   deadlineISO: string | null
 }
 
-export function BracketClient({ userId, matches, existingPredictions, isLocked, deadlineISO }: BracketClientProps) {
+export function BracketClient({ userId, matches, existingPredictions, isLocked, hasSubmitted, deadlineISO }: BracketClientProps) {
   const [draft, setDraft] = useState<Map<number, DraftPrediction>>(() => {
     if (existingPredictions.length > 0) {
       return predictionsToMap(existingPredictions)
@@ -127,11 +128,11 @@ export function BracketClient({ userId, matches, existingPredictions, isLocked, 
     )
   }
 
-  if (isLocked && existingPredictions.length === 0) {
+  if (isLocked && !hasSubmitted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center gap-4">
         <Lock className="h-12 w-12 text-muted-foreground" />
-        <h2 className="text-lg font-semibold">Predicciones cerradas</h2>
+        <h2 className="text-lg font-semibold">Plazo cerrado</h2>
         <p className="text-sm text-muted-foreground">
           El plazo para enviar la porra ha terminado.
         </p>
@@ -162,7 +163,7 @@ export function BracketClient({ userId, matches, existingPredictions, isLocked, 
             >
               <Send className="h-4 w-4 mr-2" />
               {complete
-                ? 'Enviar mi Porra'
+                ? hasSubmitted ? 'Actualizar mi Porra' : 'Enviar mi Porra'
                 : `Rellena los ${total - completed} partidos que faltan`}
             </Button>
           </div>
@@ -191,11 +192,11 @@ export function BracketClient({ userId, matches, existingPredictions, isLocked, 
         </AlertDialogContent>
       </AlertDialog>
 
-      {isLocked && existingPredictions.length > 0 && (
+      {isLocked && hasSubmitted && (
         <div className="px-4 pb-4 pt-2">
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Lock className="h-3.5 w-3.5" />
-            <span>Porra enviada y bloqueada</span>
+            <span>Plazo cerrado · Toca un partido para ver tu predicción</span>
           </div>
         </div>
       )}

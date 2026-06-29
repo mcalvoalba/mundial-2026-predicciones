@@ -16,9 +16,10 @@ interface PredictionFormProps {
   open: boolean
   onClose: () => void
   onSave: (draft: DraftPrediction) => void
+  readOnly?: boolean
 }
 
-export function PredictionForm({ match, draft, open, onClose, onSave }: PredictionFormProps) {
+export function PredictionForm({ match, draft, open, onClose, onSave, readOnly = false }: PredictionFormProps) {
   const [form, setForm] = useState<DraftPrediction>(draft)
 
   useEffect(() => {
@@ -98,6 +99,61 @@ export function PredictionForm({ match, draft, open, onClose, onSave }: Predicti
   const awayLabel = form.predicted_away || match.away_seed || 'Visitante'
   const homeFlag = getFlag(form.predicted_home || match.home_team)
   const awayFlag = getFlag(form.predicted_away || match.away_team)
+
+  if (readOnly) {
+    return (
+      <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+          <SheetHeader className="pb-2">
+            <SheetTitle className="text-base">
+              {homeFlag} {homeLabel} vs {awayFlag} {awayLabel}
+            </SheetTitle>
+          </SheetHeader>
+
+          <div className="space-y-2 pb-4">
+            <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+              <span className="text-xs text-muted-foreground">90 min</span>
+              <span className="text-lg font-bold tabular-nums">
+                {homeFlag} {form.predicted_home_goals_90} – {form.predicted_away_goals_90} {awayFlag}
+              </span>
+            </div>
+
+            {form.predicted_went_to_et && (
+              <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg">
+                <span className="text-xs text-muted-foreground">Prórroga</span>
+                <span className="text-lg font-bold tabular-nums text-amber-700 dark:text-amber-400">
+                  {homeFlag} {form.predicted_home_goals_et} – {form.predicted_away_goals_et} {awayFlag}
+                </span>
+              </div>
+            )}
+
+            {form.predicted_went_to_pens && form.predicted_pen_winner && (
+              <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg">
+                <span className="text-xs text-muted-foreground">Penaltis</span>
+                <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+                  Gana {form.predicted_pen_winner === 'home' ? homeLabel : awayLabel}
+                </span>
+              </div>
+            )}
+
+            {form.predicted_winner && (
+              <div className="flex items-center gap-2 p-3 bg-green-600/10 rounded-lg">
+                <ChevronRight className="h-4 w-4 text-green-600 flex-shrink-0" />
+                <p className="text-sm">
+                  <span className="text-muted-foreground">Clasificado: </span>
+                  <span className="font-semibold text-green-700">{form.predicted_winner}</span>
+                </p>
+              </div>
+            )}
+          </div>
+
+          <SheetFooter>
+            <Button variant="outline" onClick={onClose} className="w-full">Cerrar</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    )
+  }
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
