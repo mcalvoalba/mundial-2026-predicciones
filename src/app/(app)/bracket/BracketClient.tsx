@@ -109,6 +109,18 @@ export function BracketClient({ userId, matches, existingPredictions, isLocked, 
   const completed = countCompletedPredictions(draft)
   const total = matches.length
 
+  if (matches.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center gap-4">
+        <span className="text-4xl">⚽</span>
+        <h2 className="text-lg font-semibold">Cuadro pendiente de configurar</h2>
+        <p className="text-sm text-muted-foreground max-w-xs">
+          El administrador todavía no ha introducido los equipos. Vuelve en unos minutos.
+        </p>
+      </div>
+    )
+  }
+
   if (isLocked && existingPredictions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center gap-4">

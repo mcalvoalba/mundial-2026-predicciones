@@ -27,8 +27,19 @@ export default async function AppLayout({
     .eq('id', user.id)
     .single()
 
+  // Si no hay perfil (trigger no se ejecutó), crearlo para que el UPDATE de /register funcione
+  if (!profile) {
+    await supabase.from('profiles').upsert({
+      id: user.id,
+      email: user.email ?? '',
+      display_name: '',
+      is_admin: user.email === 'marcoscalvohovart@gmail.com',
+    }, { onConflict: 'id' })
+    redirect('/register')
+  }
+
   // Si no tiene display_name, redirigir a registro
-  if (!profile?.display_name) {
+  if (!profile.display_name) {
     redirect('/register')
   }
 

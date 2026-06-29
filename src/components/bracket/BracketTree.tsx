@@ -53,7 +53,7 @@ export function BracketTree({ matches, draft, mode, onDraftChange }: BracketTree
           <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
             <div
               className="h-full bg-green-600 rounded-full transition-all duration-300"
-              style={{ width: `${(completed / totalMatches) * 100}%` }}
+              style={{ width: totalMatches > 0 ? `${(completed / totalMatches) * 100}%` : '0%' }}
             />
           </div>
         </div>

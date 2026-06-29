@@ -32,7 +32,8 @@ export async function proxy(request: NextRequest) {
   const protectedPaths = ['/bracket', '/leaderboard', '/results', '/live']
   const isProtected = protectedPaths.some((p) => path.startsWith(p))
   const isAdmin = path.startsWith('/admin')
-  const isAuth = path.startsWith('/login') || path.startsWith('/register')
+  // /register is accessible for authenticated users (profile completion step)
+  const isLoginPage = path.startsWith('/login')
 
   if (!user && (isProtected || isAdmin)) {
     const url = request.nextUrl.clone()
@@ -40,7 +41,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  if (user && isAuth) {
+  // Authenticated users on the login page → send to bracket
+  if (user && isLoginPage) {
     const url = request.nextUrl.clone()
     url.pathname = '/bracket'
     return NextResponse.redirect(url)
