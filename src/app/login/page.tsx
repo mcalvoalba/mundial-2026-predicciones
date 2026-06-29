@@ -32,12 +32,18 @@ export default function LoginPage() {
     try {
       if (mode === 'register') {
         if (!displayName.trim()) { setError('Introduce tu nombre'); return }
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: { data: { display_name: displayName.trim() } },
         })
         if (signUpError) throw signUpError
+        // Si Supabase tiene confirmación de email activada, session es null aquí
+        if (!signUpData.session) {
+          setError('✉️ Revisa tu email y haz clic en el enlace de confirmación para acceder.')
+          setLoading(false)
+          return
+        }
         router.push('/bracket')
         router.refresh()
       } else {

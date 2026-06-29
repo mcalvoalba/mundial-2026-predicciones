@@ -105,8 +105,9 @@ ALTER TABLE matches             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bracket_submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE predictions         ENABLE ROW LEVEL SECURITY;
 
--- Profiles: todos pueden leer, cada uno actualiza el suyo
+-- Profiles: todos pueden leer, cada uno inserta/actualiza el suyo
 CREATE POLICY "profiles_read_all"   ON profiles FOR SELECT USING (true);
+CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Matches: todos leen, solo admin escribe
