@@ -111,11 +111,91 @@ export function propagateWinner(
 
   updated.set(match.next_match_id, nextDraft)
 
+  // Propagar el PERDEDOR al partido de 3er puesto (solo para semifinales)
+  if (match.loser_next_match_id) {
+    const currentDraft = updated.get(matchId)
+    if (currentDraft) {
+      const loserTeam = winnerTeam === currentDraft.predicted_home
+        ? currentDraft.predicted_away
+        : currentDraft.predicted_home
+
+      if (loserTeam) {
+        const thirdMatch = matches.find((m) => m.id === match.loser_next_match_id)
+        if (thirdMatch) {
+          const existingThird = updated.get(match.loser_next_match_id!) ?? createEmptyDraft(thirdMatch)
+          const thirdDraft = { ...existingThird }
+          // Usamos el mismo slot que el ganador tiene en la final
+          const loserSlot = match.next_match_slot
+          if (loserSlot === 'home') {
+            if (thirdDraft.predicted_home !== loserTeam) {
+              thirdDraft.predicted_home = loserTeam
+              thirdDraft.predicted_winner = ''
+              thirdDraft.predicted_home_goals_90 = ''
+              thirdDraft.predicted_away_goals_90 = ''
+              thirdDraft.predicted_went_to_et = false
+              thirdDraft.predicted_home_goals_et = ''
+              thirdDraft.predicted_away_goals_et = ''
+              thirdDraft.predicted_went_to_pens = false
+              thirdDraft.predicted_pen_winner = null
+            }
+          } else {
+            if (thirdDraft.predicted_away !== loserTeam) {
+              thirdDraft.predicted_away = loserTeam
+              thirdDraft.predicted_winner = ''
+              thirdDraft.predicted_home_goals_90 = ''
+              thirdDraft.predicted_away_goals_90 = ''
+              thirdDraft.predicted_went_to_et = false
+              thirdDraft.predicted_home_goals_et = ''
+              thirdDraft.predicted_away_goals_et = ''
+              thirdDraft.predicted_went_to_pens = false
+              thirdDraft.predicted_pen_winner = null
+            }
+          }
+          updated.set(match.loser_next_match_id!, thirdDraft)
+        }
+      }
+    }
+  }
+
   // Si el siguiente partido ya tenía un winner predicho que dependía del anterior, propagarlo recursivamente
   if (nextDraft.predicted_winner && nextDraft.predicted_winner !== '') {
     return propagateWinner(updated, matches, match.next_match_id, nextDraft.predicted_winner)
   }
 
+  return updated
+}
+
+// Rellena los equipos del 3er puesto a partir de los perdedores de las semis ya guardadas
+export function populateThirdPlace(draft: Map<number, DraftPrediction>, matches: Match[]): Map<number, DraftPrediction> {
+  const thirdMatch = matches.find((m) => m.round === '3RD')
+  if (!thirdMatch) return draft
+
+  const sfMatches = matches.filter((m) => m.round === 'SF' && m.loser_next_match_id === thirdMatch.id)
+  if (sfMatches.length === 0) return draft
+
+  const updated = new Map(draft)
+  const existingThird = updated.get(thirdMatch.id) ?? createEmptyDraft(thirdMatch)
+  const thirdDraft = { ...existingThird }
+  let changed = false
+
+  for (const sf of sfMatches) {
+    const sfDraft = updated.get(sf.id)
+    if (!sfDraft?.predicted_winner) continue
+    const loser = sfDraft.predicted_winner === sfDraft.predicted_home
+      ? sfDraft.predicted_away
+      : sfDraft.predicted_home
+    if (!loser) continue
+    const slot = sf.next_match_slot
+    if (slot === 'home' && thirdDraft.predicted_home !== loser) {
+      thirdDraft.predicted_home = loser
+      changed = true
+    } else if (slot === 'away' && thirdDraft.predicted_away !== loser) {
+      thirdDraft.predicted_away = loser
+      changed = true
+    }
+  }
+
+  if (changed) updated.set(thirdMatch.id, thirdDraft)
   return updated
 }
 

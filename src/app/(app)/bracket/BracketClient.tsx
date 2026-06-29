@@ -21,6 +21,7 @@ import {
   predictionsToMap,
   isDraftComplete,
   countCompletedPredictions,
+  populateThirdPlace,
 } from '@/lib/bracket'
 import type { Match, Prediction, DraftPrediction } from '@/lib/types'
 import { Lock, Send } from 'lucide-react'
@@ -49,8 +50,11 @@ export function BracketClient({ userId, matches, existingPredictions, isLocked, 
   useEffect(() => {
     if (isLocked || existingPredictions.length > 0) return
     const stored = loadDraftFromStorage(userId)
-    if (stored.size > 0) setDraft(stored)
-  }, [userId, isLocked, existingPredictions.length])
+    if (stored.size > 0) {
+      // Retroactively populate 3rd place teams from SF losers already in draft
+      setDraft(populateThirdPlace(stored, matches))
+    }
+  }, [userId, isLocked, existingPredictions.length, matches])
 
   const handleDraftChange = useCallback((newDraft: Map<number, DraftPrediction>) => {
     setDraft(newDraft)
