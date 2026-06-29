@@ -28,12 +28,19 @@ export default function RegisterPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      const { error: updateError } = await supabase
+      const { error: upsertError } = await supabase
         .from('profiles')
-        .update({ display_name: displayName.trim() })
-        .eq('id', user.id)
+        .upsert(
+          {
+            id: user.id,
+            email: user.email ?? '',
+            display_name: displayName.trim(),
+            is_admin: user.email === 'marcoscalvohovart@gmail.com',
+          },
+          { onConflict: 'id' }
+        )
 
-      if (updateError) throw updateError
+      if (upsertError) throw upsertError
       router.push('/bracket')
       router.refresh()
     } catch (err: unknown) {
