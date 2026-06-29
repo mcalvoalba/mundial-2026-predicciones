@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import type { Match, DraftPrediction } from '@/lib/types'
 import { derivePredictedWinner } from '@/lib/scoring'
 import { ChevronRight } from 'lucide-react'
+import { getFlag } from '@/lib/flags'
 
 interface PredictionFormProps {
   match: Match
@@ -95,13 +96,15 @@ export function PredictionForm({ match, draft, open, onClose, onSave }: Predicti
 
   const homeLabel = form.predicted_home || match.home_seed || 'Local'
   const awayLabel = form.predicted_away || match.away_seed || 'Visitante'
+  const homeFlag = getFlag(form.predicted_home || match.home_team)
+  const awayFlag = getFlag(form.predicted_away || match.away_team)
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
         <SheetHeader className="pb-2">
           <SheetTitle className="text-base">
-            {homeLabel} vs {awayLabel}
+            {homeFlag} {homeLabel} vs {awayFlag} {awayLabel}
           </SheetTitle>
         </SheetHeader>
 
@@ -111,7 +114,7 @@ export function PredictionForm({ match, draft, open, onClose, onSave }: Predicti
             <Label className="text-sm font-medium mb-3 block">Resultado a 90 minutos</Label>
             <div className="flex items-center gap-3">
               <div className="flex-1 text-center">
-                <p className="text-xs text-muted-foreground mb-1 truncate">{homeLabel}</p>
+                <p className="text-xs text-muted-foreground mb-1 truncate">{homeFlag} {homeLabel}</p>
                 <Input
                   type="number"
                   inputMode="numeric"
@@ -125,7 +128,7 @@ export function PredictionForm({ match, draft, open, onClose, onSave }: Predicti
               </div>
               <span className="text-2xl font-bold text-muted-foreground">-</span>
               <div className="flex-1 text-center">
-                <p className="text-xs text-muted-foreground mb-1 truncate">{awayLabel}</p>
+                <p className="text-xs text-muted-foreground mb-1 truncate">{awayFlag} {awayLabel}</p>
                 <Input
                   type="number"
                   inputMode="numeric"
@@ -149,7 +152,7 @@ export function PredictionForm({ match, draft, open, onClose, onSave }: Predicti
               <Label className="text-sm font-medium mb-3 block">Resultado tras prórroga (120 min)</Label>
               <div className="flex items-center gap-3">
                 <div className="flex-1 text-center">
-                  <p className="text-xs text-muted-foreground mb-1 truncate">{homeLabel}</p>
+                  <p className="text-xs text-muted-foreground mb-1 truncate">{homeFlag} {homeLabel}</p>
                   <Input
                     type="number"
                     inputMode="numeric"
@@ -163,7 +166,7 @@ export function PredictionForm({ match, draft, open, onClose, onSave }: Predicti
                 </div>
                 <span className="text-2xl font-bold text-muted-foreground">-</span>
                 <div className="flex-1 text-center">
-                  <p className="text-xs text-muted-foreground mb-1 truncate">{awayLabel}</p>
+                  <p className="text-xs text-muted-foreground mb-1 truncate">{awayFlag} {awayLabel}</p>
                   <Input
                     type="number"
                     inputMode="numeric"

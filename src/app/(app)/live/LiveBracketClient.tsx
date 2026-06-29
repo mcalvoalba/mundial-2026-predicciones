@@ -6,6 +6,7 @@ import type { Match, Round } from '@/lib/types'
 import { ROUND_LABELS } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { CheckCircle2, Clock } from 'lucide-react'
+import { getFlag } from '@/lib/flags'
 
 const ROUND_SEQUENCE: Round[] = ['R32', 'R16', 'QF', 'SF', 'FINAL']
 
@@ -25,12 +26,18 @@ function LiveMatchCard({ match }: LiveMatchCardProps) {
     )}>
       <div className="p-2 space-y-1">
         <div className={cn('flex items-center justify-between gap-1', homeWon && 'font-bold text-green-700')}>
-          <span className="truncate flex-1">{match.home_team || match.home_seed || '?'}</span>
+          <span className="truncate flex-1">
+            {getFlag(match.home_team) && <span className="mr-1">{getFlag(match.home_team)}</span>}
+            {match.home_team || match.home_seed || '?'}
+          </span>
           {hasResult && <span className="tabular-nums font-semibold">{match.home_goals_90}</span>}
         </div>
         <div className="border-t border-border/50" />
         <div className={cn('flex items-center justify-between gap-1', awayWon && 'font-bold text-green-700')}>
-          <span className="truncate flex-1">{match.away_team || match.away_seed || '?'}</span>
+          <span className="truncate flex-1">
+            {getFlag(match.away_team) && <span className="mr-1">{getFlag(match.away_team)}</span>}
+            {match.away_team || match.away_seed || '?'}
+          </span>
           {hasResult && <span className="tabular-nums font-semibold">{match.away_goals_90}</span>}
         </div>
         <div className="flex items-center gap-1 pt-0.5">

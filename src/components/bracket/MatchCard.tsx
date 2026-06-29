@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils'
 import type { Match, DraftPrediction } from '@/lib/types'
 import { CheckCircle2, Circle } from 'lucide-react'
+import { getFlag } from '@/lib/flags'
 
 interface MatchCardProps {
   match: Match
@@ -14,6 +15,8 @@ interface MatchCardProps {
 export function MatchCard({ match, draft, mode, onClick }: MatchCardProps) {
   const homeTeam = draft?.predicted_home || match.home_team || match.home_seed || '?'
   const awayTeam = draft?.predicted_away || match.away_team || match.away_seed || '?'
+  const homeFlag = getFlag(draft?.predicted_home || match.home_team)
+  const awayFlag = getFlag(draft?.predicted_away || match.away_team)
   const hasScore = draft && draft.predicted_home_goals_90 !== '' && draft.predicted_away_goals_90 !== ''
   const hasWinner = !!draft?.predicted_winner
   const isComplete = hasScore && hasWinner
@@ -40,7 +43,7 @@ export function MatchCard({ match, draft, mode, onClick }: MatchCardProps) {
           'flex items-center justify-between gap-1 text-xs',
           draft?.predicted_winner === draft?.predicted_home && 'font-bold text-green-700'
         )}>
-          <span className="truncate flex-1">{homeTeam}</span>
+          <span className="truncate flex-1">{homeFlag && <span className="mr-1">{homeFlag}</span>}{homeTeam}</span>
           {homeGoals !== null && (
             <span className="font-semibold tabular-nums text-sm">{homeGoals}</span>
           )}
@@ -54,7 +57,7 @@ export function MatchCard({ match, draft, mode, onClick }: MatchCardProps) {
           'flex items-center justify-between gap-1 text-xs',
           draft?.predicted_winner === draft?.predicted_away && 'font-bold text-green-700'
         )}>
-          <span className="truncate flex-1">{awayTeam}</span>
+          <span className="truncate flex-1">{awayFlag && <span className="mr-1">{awayFlag}</span>}{awayTeam}</span>
           {awayGoals !== null && (
             <span className="font-semibold tabular-nums text-sm">{awayGoals}</span>
           )}
