@@ -28,27 +28,35 @@ export function calculatePoints(pred: Prediction, match: Match): number {
 
   let points = 5
 
-  // Bono prórroga: +1 si ET exacto, +0.5 si predijo ET y ocurrió pero no exacto
-  if (match.went_to_et && pred.predicted_went_to_et) {
+  if (match.went_to_pens) {
+    // Partido decidido en penaltis: bono por acertar ganador (+2), y adicionalmente
+    // por prórroga exacta (+1 más = 8 total). El bono de 5.5 no aplica aquí.
+    if (pred.predicted_went_to_pens && match.pen_winner) {
+      const actualPenWinner =
+        match.pen_winner === 'home' ? match.home_team : match.away_team
+      const predPenWinner =
+        pred.predicted_pen_winner === 'home'
+          ? pred.predicted_home
+          : pred.predicted_away
+      if (actualPenWinner === predPenWinner) {
+        const exactET =
+          match.went_to_et &&
+          pred.predicted_went_to_et &&
+          match.home_goals_et !== null &&
+          match.away_goals_et !== null &&
+          match.home_goals_et === pred.predicted_home_goals_et &&
+          match.away_goals_et === pred.predicted_away_goals_et
+        points += exactET ? 3 : 2  // 8 o 7 pts
+      }
+    }
+  } else if (match.went_to_et && pred.predicted_went_to_et) {
+    // Partido decidido en prórroga (sin penaltis): +1 si exacto, +0.5 si no exacto (5.5 pts)
     const exactET =
       match.home_goals_et !== null &&
       match.away_goals_et !== null &&
       match.home_goals_et === pred.predicted_home_goals_et &&
       match.away_goals_et === pred.predicted_away_goals_et
     points += exactET ? 1 : 0.5
-  }
-
-  // +2: acertó el ganador en penaltis
-  if (match.went_to_pens && pred.predicted_went_to_pens && match.pen_winner) {
-    const actualPenWinner =
-      match.pen_winner === 'home' ? match.home_team : match.away_team
-    const predPenWinner =
-      pred.predicted_pen_winner === 'home'
-        ? pred.predicted_home
-        : pred.predicted_away
-    if (actualPenWinner === predPenWinner) {
-      points += 2
-    }
   }
 
   return points * multiplier

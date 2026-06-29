@@ -46,14 +46,13 @@ function RulesSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
             <h3 className="text-sm font-semibold mb-3">Puntuación base</h3>
             <div className="space-y-2">
               {[
-                { pts: '0 pts', desc: 'Ganador incorrecto', color: 'text-destructive' },
-                { pts: '3 pts', desc: 'Ganador correcto (pero no el resultado exacto)', color: 'text-amber-600' },
-                { pts: '5 pts', desc: 'Resultado exacto a 90 minutos', color: 'text-green-600' },
-                { pts: '5.5 pts', desc: 'Exacto a 90 min + predijo prórroga + ganador en prórroga (marcador ET no exacto)', color: 'text-green-600' },
-                { pts: '6 pts', desc: 'Exacto a 90 min + marcador exacto en prórroga', color: 'text-green-600' },
-                { pts: '7 pts', desc: 'Exacto a 90 min + ganador correcto en penaltis', color: 'text-green-600' },
-                { pts: '7.5 pts', desc: 'Exacto a 90 min + predijo prórroga (no exacta) + ganador en penaltis', color: 'text-green-600' },
-                { pts: '8 pts', desc: 'Exacto a 90 min + prórroga exacta + ganador en penaltis', color: 'text-green-600 font-semibold' },
+                { pts: '0 pts', desc: "Fallaste quién pasa de ronda", color: 'text-destructive' },
+                { pts: '3 pts', desc: "Acertaste quién pasa, pero el marcador a 90' no es exacto", color: 'text-amber-600' },
+                { pts: '5 pts', desc: "Marcador exacto a 90'", color: 'text-green-600' },
+                { pts: '5.5 pts', desc: "Exacto a 90' + acertaste que habría prórroga + acertaste quién ganaba en ella (marcador de prórroga no exacto)", color: 'text-green-600' },
+                { pts: '6 pts', desc: "Exacto a 90' + marcador exacto en la prórroga", color: 'text-green-600' },
+                { pts: '7 pts', desc: "Exacto a 90' + acertaste que iba a penaltis + acertaste quién ganaba la tanda (sin importar si hubo prórroga, mientras no acertaras su marcador exacto)", color: 'text-green-600' },
+                { pts: '8 pts', desc: "Exacto a 90' + prórroga exacta + penaltis ganados por quien predijiste", color: 'text-green-600 font-semibold' },
               ].map(({ pts, desc, color }) => (
                 <div key={pts} className="flex items-start gap-3 p-2.5 rounded-lg bg-secondary/50">
                   <span className={`text-sm font-bold min-w-[52px] ${color}`}>{pts}</span>
