@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { BottomNav } from '@/components/shared/BottomNav'
 import { TopBar } from '@/components/shared/TopBar'
+import { SplashShell } from '@/components/SplashShell'
 import type { Profile } from '@/lib/types'
 
 const PAGE_TITLES: Record<string, string> = {
@@ -44,12 +45,14 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <TopBar title="Porra Mundial 2026" profile={profile as Profile} />
-      <main className="flex-1 pb-20">
-        {children}
-      </main>
-      <BottomNav />
-    </div>
+    <SplashShell>
+      <div className="flex flex-col min-h-screen">
+        <TopBar title="Porra Mundial 2026" profile={profile as Profile} />
+        <main className="flex-1 pb-20">
+          {children}
+        </main>
+        <BottomNav />
+      </div>
+    </SplashShell>
   )
 }
