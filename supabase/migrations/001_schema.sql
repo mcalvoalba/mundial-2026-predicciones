@@ -233,5 +233,12 @@ UPDATE matches SET
   loser_next_match_id = (SELECT id FROM matches WHERE match_number = 31)
 WHERE match_number = 30;
 
--- 8. HABILITAR REALTIME para las tablas que necesitan actualizaciones en vivo
+-- 8. PERMISOS PARA ROLES authenticated Y anon
+-- Sin esto, los usuarios autenticados reciben "permission denied for table X"
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO anon;
+
+-- 9. HABILITAR REALTIME para las tablas que necesitan actualizaciones en vivo
 -- (Hacer esto en el Dashboard de Supabase: Database → Replication → añadir matches y predictions)
