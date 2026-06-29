@@ -62,7 +62,7 @@ export function BracketClient({ userId, matches, existingPredictions, isLocked, 
   }, [userId])
 
   async function handleSubmit() {
-    if (!isDraftComplete(draft, matches)) return
+    setConfirmOpen(false)
     setSaving(true)
     setSaveError('')
     const supabase = createClient()
