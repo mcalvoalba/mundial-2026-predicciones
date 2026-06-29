@@ -37,7 +37,11 @@ export default function RegisterPage() {
       router.push('/bracket')
       router.refresh()
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al guardar')
+      // Supabase errors are plain objects with a .message field (not instanceof Error)
+      const msg = err instanceof Error
+        ? err.message
+        : (err as Record<string, unknown>)?.message as string | undefined
+      setError(msg ?? 'Error al guardar')
     } finally {
       setLoading(false)
     }
