@@ -1,7 +1,20 @@
-import type { Prediction, Match } from './types'
+import type { Prediction, Match, Round } from './types'
+
+function roundMultiplier(round: Round): number {
+  switch (round) {
+    case 'R16': return 1.25
+    case 'QF': return 1.5
+    case 'SF': return 1.75
+    case '3RD': return 1.75
+    case 'FINAL': return 2
+    default: return 1
+  }
+}
 
 export function calculatePoints(pred: Prediction, match: Match): number {
   if (!match.result_locked || match.winner_team === null) return 0
+
+  const multiplier = roundMultiplier(match.round)
 
   // ¿Acertó el equipo ganador?
   if (pred.predicted_winner !== match.winner_team) return 0
@@ -11,20 +24,18 @@ export function calculatePoints(pred: Prediction, match: Match): number {
     match.home_goals_90 === pred.predicted_home_goals_90 &&
     match.away_goals_90 === pred.predicted_away_goals_90
 
-  if (!exact90) return 3
+  if (!exact90) return 3 * multiplier
 
   let points = 5
 
-  // +1: resultado exacto en 120min (prórroga)
-  if (
-    match.went_to_et &&
-    pred.predicted_went_to_et &&
-    match.home_goals_et !== null &&
-    match.away_goals_et !== null &&
-    match.home_goals_et === pred.predicted_home_goals_et &&
-    match.away_goals_et === pred.predicted_away_goals_et
-  ) {
-    points += 1
+  // Bono prórroga: +1 si ET exacto, +0.5 si predijo ET y ocurrió pero no exacto
+  if (match.went_to_et && pred.predicted_went_to_et) {
+    const exactET =
+      match.home_goals_et !== null &&
+      match.away_goals_et !== null &&
+      match.home_goals_et === pred.predicted_home_goals_et &&
+      match.away_goals_et === pred.predicted_away_goals_et
+    points += exactET ? 1 : 0.5
   }
 
   // +2: acertó el ganador en penaltis
@@ -40,7 +51,7 @@ export function calculatePoints(pred: Prediction, match: Match): number {
     }
   }
 
-  return points
+  return points * multiplier
 }
 
 export function derivePredictedWinner(draft: {

@@ -43,22 +43,45 @@ function RulesSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
 
           {/* Sistema de puntuación */}
           <div>
-            <h3 className="text-sm font-semibold mb-3">Sistema de puntuación</h3>
+            <h3 className="text-sm font-semibold mb-3">Puntuación base</h3>
             <div className="space-y-2">
               {[
                 { pts: '0 pts', desc: 'Ganador incorrecto', color: 'text-destructive' },
                 { pts: '3 pts', desc: 'Ganador correcto (pero no el resultado exacto)', color: 'text-amber-600' },
                 { pts: '5 pts', desc: 'Resultado exacto a 90 minutos', color: 'text-green-600' },
-                { pts: '6 pts', desc: 'Exacto a 90 min + resultado exacto en prórroga', color: 'text-green-600' },
+                { pts: '5.5 pts', desc: 'Exacto a 90 min + predijo prórroga + ganador en prórroga (marcador ET no exacto)', color: 'text-green-600' },
+                { pts: '6 pts', desc: 'Exacto a 90 min + marcador exacto en prórroga', color: 'text-green-600' },
                 { pts: '7 pts', desc: 'Exacto a 90 min + ganador correcto en penaltis', color: 'text-green-600' },
-                { pts: '8 pts', desc: 'Exacto a 90 min + exacto en prórroga + ganador en penaltis', color: 'text-green-600 font-semibold' },
+                { pts: '7.5 pts', desc: 'Exacto a 90 min + predijo prórroga (no exacta) + ganador en penaltis', color: 'text-green-600' },
+                { pts: '8 pts', desc: 'Exacto a 90 min + prórroga exacta + ganador en penaltis', color: 'text-green-600 font-semibold' },
               ].map(({ pts, desc, color }) => (
                 <div key={pts} className="flex items-start gap-3 p-2.5 rounded-lg bg-secondary/50">
-                  <span className={`text-sm font-bold min-w-[46px] ${color}`}>{pts}</span>
+                  <span className={`text-sm font-bold min-w-[52px] ${color}`}>{pts}</span>
                   <span className="text-sm text-muted-foreground">{desc}</span>
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Multiplicadores por ronda */}
+          <div>
+            <h3 className="text-sm font-semibold mb-3">Multiplicador por ronda</h3>
+            <div className="space-y-2">
+              {[
+                { ronda: 'Dieciseisavos', mult: '×1' },
+                { ronda: 'Octavos', mult: '×1.25' },
+                { ronda: 'Cuartos', mult: '×1.5' },
+                { ronda: 'Semifinales', mult: '×1.75' },
+                { ronda: 'Tercer puesto', mult: '×1.75' },
+                { ronda: 'Final', mult: '×2' },
+              ].map(({ ronda, mult }) => (
+                <div key={ronda} className="flex items-center justify-between p-2.5 rounded-lg bg-secondary/50">
+                  <span className="text-sm text-muted-foreground">{ronda}</span>
+                  <span className="text-sm font-bold text-green-700">{mult}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Ejemplo: acertar el ganador en una final son 3×2 = 6 pts</p>
           </div>
 
           {/* Notas */}
