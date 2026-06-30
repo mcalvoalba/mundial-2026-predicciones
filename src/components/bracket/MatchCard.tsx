@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import type { Match, DraftPrediction } from '@/lib/types'
-import { CheckCircle2, Circle, Lock } from 'lucide-react'
+import { CheckCircle2, Circle, Lock, Clock } from 'lucide-react'
 import { getFlag } from '@/lib/flags'
 
 interface MatchCardProps {
@@ -10,9 +10,42 @@ interface MatchCardProps {
   draft?: DraftPrediction
   mode: 'edit' | 'view'
   onClick?: () => void
+  timeLocked?: boolean
 }
 
-export function MatchCard({ match, draft, mode, onClick }: MatchCardProps) {
+export function MatchCard({ match, draft, mode, onClick, timeLocked }: MatchCardProps) {
+  const inProgress = mode === 'edit' && (timeLocked || (match.result_locked && !match.winner_team))
+
+  // Partido en curso: mostrar predicción del usuario, no editable
+  if (inProgress) {
+    const homeFlag = getFlag(match.home_team)
+    const awayFlag = getFlag(match.away_team)
+    const htName = match.home_team || match.home_seed || '?'
+    const atName = match.away_team || match.away_seed || '?'
+    const hasScore = !!(draft && draft.predicted_home_goals_90 !== '' && draft.predicted_away_goals_90 !== '')
+    const homeGoals = hasScore ? draft!.predicted_home_goals_90 : null
+    const awayGoals = hasScore ? draft!.predicted_away_goals_90 : null
+    return (
+      <div className="w-40 rounded-lg border border-amber-500/40 bg-amber-50/30 dark:bg-amber-950/20 cursor-not-allowed select-none">
+        <div className="p-2 space-y-1">
+          <div className="flex items-center justify-between gap-1 text-xs">
+            <span className="truncate flex-1">{homeFlag && <span className="mr-1">{homeFlag}</span>}{htName}</span>
+            {homeGoals !== null && <span className="tabular-nums font-semibold text-sm">{homeGoals}</span>}
+          </div>
+          <div className="border-t border-border/50" />
+          <div className="flex items-center justify-between gap-1 text-xs">
+            <span className="truncate flex-1">{awayFlag && <span className="mr-1">{awayFlag}</span>}{atName}</span>
+            {awayGoals !== null && <span className="tabular-nums font-semibold text-sm">{awayGoals}</span>}
+          </div>
+          <div className="flex items-center gap-1 pt-0.5">
+            <Clock className="h-3 w-3 text-amber-500" />
+            <span className="text-[10px] text-amber-600 font-medium">En juego</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Partido ya jugado: mostrar resultado real y bloquear edición
   if (match.result_locked && mode === 'edit') {
     const homeFlag = getFlag(match.home_team)

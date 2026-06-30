@@ -21,7 +21,7 @@ export default async function BracketPage() {
       userId={user.id}
       matches={(matchesRes.data ?? []) as Match[]}
       existingPredictions={(predictionsRes.data ?? []) as Prediction[]}
-      isLocked={false}
+      isLocked={hasSubmitted}
       hasSubmitted={hasSubmitted}
       deadlineISO={null}
     />

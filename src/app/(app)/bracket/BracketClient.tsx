@@ -24,7 +24,7 @@ import {
   populateThirdPlace,
 } from '@/lib/bracket'
 import type { Match, Prediction, DraftPrediction } from '@/lib/types'
-import { Lock, Send } from 'lucide-react'
+import { Lock, Send, CheckCircle2 } from 'lucide-react'
 
 interface BracketClientProps {
   userId: string
@@ -42,10 +42,17 @@ export function BracketClient({ userId, matches, existingPredictions, isLocked, 
     }
     return new Map()
   })
+  const [now, setNow] = useState(() => new Date())
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [saved, setSaved] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
+
+  // Update current time every 30s to reflect match time locks
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30000)
+    return () => clearInterval(id)
+  }, [])
 
   // Load from localStorage on mount (only if no existing predictions)
   useEffect(() => {
@@ -110,8 +117,11 @@ export function BracketClient({ userId, matches, existingPredictions, isLocked, 
     }
   }
 
-  // Played matches (result_locked) don't need a user prediction
-  const playableMatches = matches.filter((m) => !m.result_locked)
+  // Matches that have kicked off (or finished) don't need a user prediction
+  function isTimeLocked(m: Match) {
+    return !m.result_locked && !!m.match_date && new Date(m.match_date) <= now
+  }
+  const playableMatches = matches.filter((m) => !m.result_locked && !isTimeLocked(m))
   const complete = isDraftComplete(draft, playableMatches)
   const completed = countCompletedPredictions(draft, playableMatches)
   const total = playableMatches.length
@@ -140,16 +150,19 @@ export function BracketClient({ userId, matches, existingPredictions, isLocked, 
     )
   }
 
+  const viewOnly = isLocked || hasSubmitted || existingPredictions.length > 0
+
   return (
     <div>
       <BracketTree
         matches={matches}
         draft={draft}
-        mode={isLocked ? 'view' : 'edit'}
-        onDraftChange={isLocked ? undefined : handleDraftChange}
+        mode={viewOnly ? 'view' : 'edit'}
+        onDraftChange={viewOnly ? undefined : handleDraftChange}
+        now={viewOnly ? undefined : now}
       />
 
-      {!isLocked && (
+      {!viewOnly && (
         <div className="fixed bottom-20 left-0 right-0 px-4 pb-2 z-30">
           <div className="max-w-sm mx-auto">
             {saveError && (
@@ -163,7 +176,7 @@ export function BracketClient({ userId, matches, existingPredictions, isLocked, 
             >
               <Send className="h-4 w-4 mr-2" />
               {complete
-                ? hasSubmitted ? 'Actualizar mi Porra' : 'Enviar mi Porra'
+                ? 'Enviar mi Porra'
                 : `Rellena los ${total - completed} partidos que faltan`}
             </Button>
           </div>
@@ -192,11 +205,11 @@ export function BracketClient({ userId, matches, existingPredictions, isLocked, 
         </AlertDialogContent>
       </AlertDialog>
 
-      {isLocked && hasSubmitted && (
+      {hasSubmitted && (
         <div className="px-4 pb-4 pt-2">
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Lock className="h-3.5 w-3.5" />
-            <span>Plazo cerrado · Toca un partido para ver tu predicción</span>
+            <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+            <span>Porra enviada · Toca un partido para ver tu predicción</span>
           </div>
         </div>
       )}

@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import type { Match } from '@/lib/types'
 import { ROUND_LABELS } from '@/lib/types'
 import { CheckCircle2, Clock, Users } from 'lucide-react'
+import { RecalcButton } from '@/components/admin/RecalcButton'
 
 export default async function AdminPage() {
   const supabase = await createClient()
@@ -36,6 +37,9 @@ export default async function AdminPage() {
           <p className="text-xs text-muted-foreground">Participantes</p>
         </div>
       </div>
+
+      {/* Recalc */}
+      <RecalcButton />
 
       {/* Participants */}
       <div>

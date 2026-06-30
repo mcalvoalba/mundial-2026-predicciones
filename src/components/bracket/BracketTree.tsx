@@ -12,13 +12,19 @@ interface BracketTreeProps {
   draft: Map<number, DraftPrediction>
   mode: 'edit' | 'view'
   onDraftChange?: (draft: Map<number, DraftPrediction>) => void
+  now?: Date
 }
 
 const ROUND_SEQUENCE: Round[] = ['R32', 'R16', 'QF', 'SF', 'FINAL']
 const THIRD_PLACE: Round[] = ['3RD']
 
-export function BracketTree({ matches, draft, mode, onDraftChange }: BracketTreeProps) {
+export function BracketTree({ matches, draft, mode, onDraftChange, now }: BracketTreeProps) {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null)
+
+  function isTimeLocked(m: Match): boolean {
+    if (!now || m.result_locked || !m.match_date) return false
+    return new Date(m.match_date) <= now
+  }
 
   const handleMatchClick = useCallback((match: Match) => {
     setSelectedMatch(match)
@@ -37,8 +43,8 @@ export function BracketTree({ matches, draft, mode, onDraftChange }: BracketTree
       .sort((a, b) => a.match_number - b.match_number)
   }
 
-  // Only count matches that aren't already played (locked = no prediction needed)
-  const playableMatches = matches.filter((m) => !m.result_locked)
+  // Only count matches that haven't started or finished (no prediction needed once kicked off)
+  const playableMatches = matches.filter((m) => !m.result_locked && !isTimeLocked(m))
   const totalMatches = playableMatches.length
   const completed = countCompletedPredictions(draft, playableMatches)
 
@@ -74,6 +80,7 @@ export function BracketTree({ matches, draft, mode, onDraftChange }: BracketTree
                 draft={draft}
                 mode={mode}
                 onMatchClick={handleMatchClick}
+                isTimeLocked={isTimeLocked}
               />
             )
           })}
@@ -93,6 +100,7 @@ export function BracketTree({ matches, draft, mode, onDraftChange }: BracketTree
                     match={match}
                     draft={draft.get(match.id)}
                     mode={mode}
+                    timeLocked={isTimeLocked(match)}
                     onClick={() => handleMatchClick(match)}
                   />
                 ))}
@@ -123,12 +131,14 @@ function RoundColumn({
   draft,
   mode,
   onMatchClick,
+  isTimeLocked,
 }: {
   round: Round
   matches: Match[]
   draft: Map<number, DraftPrediction>
   mode: 'edit' | 'view'
   onMatchClick: (match: Match) => void
+  isTimeLocked: (m: Match) => boolean
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -142,6 +152,7 @@ function RoundColumn({
             match={match}
             draft={draft.get(match.id)}
             mode={mode}
+            timeLocked={isTimeLocked(match)}
             onClick={() => onMatchClick(match)}
           />
         ))}
