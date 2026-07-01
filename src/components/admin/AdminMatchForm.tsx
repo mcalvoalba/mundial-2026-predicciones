@@ -3,12 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { calculatePoints } from '@/lib/scoring'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { Match, Prediction } from '@/lib/types'
+import type { Match } from '@/lib/types'
 
 interface AdminMatchFormProps {
   match: Match
@@ -130,22 +129,8 @@ export function AdminMatchForm({ match }: AdminMatchFormProps) {
           .eq('id', match.loser_next_match_id)
       }
 
-      // Calcular puntos para todas las predicciones de este partido
-      const { data: predictions } = await supabase
-        .from('predictions')
-        .select('*')
-        .eq('match_id', match.id)
-
-      if (predictions && predictions.length > 0) {
-        const updatedMatch = { ...match, ...matchUpdate, winner_team: winner, result_locked: true }
-        for (const pred of predictions as Prediction[]) {
-          const pts = calculatePoints(pred, updatedMatch as Match)
-          await supabase
-            .from('predictions')
-            .update({ points_earned: pts })
-            .eq('id', pred.id)
-        }
-      }
+      // Calcular puntos para todas las predicciones vía función SECURITY DEFINER (omite RLS)
+      await supabase.rpc('recalc_match_points', { p_match_id: match.id })
 
       router.push('/admin')
       router.refresh()
